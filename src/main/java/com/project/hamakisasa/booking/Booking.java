@@ -30,4 +30,3 @@ public class Booking {
     private BookingStatus status; // Pending, Confirmed, Cancelled
 
 }
-

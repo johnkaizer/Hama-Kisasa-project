@@ -1,5 +1,6 @@
 package com.project.hamakisasa.properties;
 
+import com.project.hamakisasa.review.Review;
 import com.project.hamakisasa.users.User;
 import jakarta.persistence.*;
 import lombok.Data;
