@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hama Kisasa - Property Listings</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<!-- Top bar with Login and Wishlist icons -->
+<div class="top-bar">
+    <a href="/login">Login</a>
+    <a href="/wishlist">Wishlist</a>
+</div>
+
+<div class="container">
+    <header>
+        <h1>Find Your Perfect Home</h1>
+        <p>Explore the latest property listings on Hama Kisasa</p>
+    </header>
+
+    <!-- Filters Section -->
+    <div class="filter-section">
+        <input type="text" id="search" placeholder="Search by location..." />
+        <select id="propertyType">
+            <option value="">All Types</option>
+            <option value="APARTMENT">Apartment</option>
+            <option value="BUNGALOW">Bungalow</option>
+        </select>
+        <input type="number" id="minPrice" placeholder="Min Price" />
+        <input type="number" id="maxPrice" placeholder="Max Price" />
+        <button onclick="applyFilters()">Apply Filters</button>
+    </div>
+
+    <!-- Properties Section -->
+    <div id="properties" class="properties">
+        <!-- Cards will be injected here -->
+    </div>
+</div>
+
+<script>
+    // Mock data for properties and JavaScript functions
+    const properties = [
+        {
+            id: 1,
+            name: "Modern Apartment",
+            location: "Nairobi",
+            price: 45000,
+            bedrooms: 3,
+            propertyType: "APARTMENT",
+            photos: ["https://via.placeholder.com/280x180.png?text=Apartment+1"]
+        },
+        {
+            id: 2,
+            name: "Family Bungalow",
+            location: "Mombasa",
+            price: 75000,
+            bedrooms: 4,
+            propertyType: "BUNGALOW",
+            photos: ["https://via.placeholder.com/280x180.png?text=Bungalow+1"]
+        },
+        {
+            id: 3,
+            name: "Luxury Apartment",
+            location: "Nairobi",
+            price: 120000,
+            bedrooms: 5,
+            propertyType: "APARTMENT",
+            photos: "https://images.app.goo.gl/jdqBFMhbyjJmupA4A"
+        },
+        {
+            id: 4,
+            name: "Cozy Bungalow",
+            location: "Kisumu",
+            price: 60000,
+            bedrooms: 3,
+            propertyType: "BUNGALOW",
+            photos: ["https://images.app.goo.gl/jdqBFMhbyjJmupA4A/280x180.png?text=Bungalow+2"]
+        }
+    ];
+
+    let wishlist = [];
+
+    // Function to display properties on the page
+    function displayProperties(properties) {
+        const propertiesContainer = document.getElementById('properties');
+        propertiesContainer.innerHTML = ''; // Clear previous results
+
+        properties.forEach(property => {
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            card.innerHTML = `
+                    <img src="${property.photos[0]}" alt="${property.name}">
+                    <div class="card-content">
+                        <h3>${property.name}</h3>
+                        <p>Location: ${property.location}</p>
+                        <p>Bedrooms: ${property.bedrooms}</p>
+                        <p class="price">Ksh ${property.price}</p>
+                    </div>
+                    <button class="wishlist-btn" onclick="addToWishlist(${property.id})">&#x2764;</button>
+                `;
+
+            propertiesContainer.appendChild(card);
+        });
+    }
+
+    // Function to add property to wishlist
+    function addToWishlist(propertyId) {
+        const property = properties.find(prop => prop.id === propertyId);
+        if (!wishlist.includes(property)) {
+            wishlist.push(property);
+            alert(`${property.name} added to your wishlist!`);
+        } else {
+            alert(`${property.name} is already in your wishlist.`);
+        }
+        console.log("Wishlist:", wishlist); // For debugging
+    }
+
+    // Function to apply filters and display the filtered properties
+    function applyFilters() {
+        const search = document.getElementById('search').value.toLowerCase();
+        const propertyType = document.getElementById('propertyType').value;
+        const minPrice = parseInt(document.getElementById('minPrice').value) || 0;
+        const maxPrice = parseInt(document.getElementById('maxPrice').value) || Infinity;
+
+        const filteredProperties = properties.filter(property => {
+            const matchesLocation = property.location.toLowerCase().includes(search);
+            const matchesType = !propertyType || property.propertyType === propertyType;
+            const matchesPrice = property.price >= minPrice && property.price <= maxPrice;
+
+            return matchesLocation && matchesType && matchesPrice;
+        });
+
+        displayProperties(filteredProperties);
+    }
+
+    // Initial display of all properties
+    displayProperties(properties);
+</script>
+</body>
+</html>

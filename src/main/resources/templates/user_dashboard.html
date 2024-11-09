@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard - Hama Kisasa</title>
+    <link rel="stylesheet" href="/static/dashboard.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="sidebar">
+        <h2>User Panel</h2>
+        <ul>
+            <li><a href="#" data-page="user_search.html" class="selected"><span class="icon">🔍</span> Search Properties</a></li>
+            <li><a href="#" data-page="user_wishlist.html"><span class="icon">❤️</span> Wishlist</a></li>
+            <li><a href="#" data-page="user_bookings.html"><span class="icon">📅</span> Bookings</a></li>
+            <li><a href="#" data-page="user_profile.html"><span class="icon">👤</span> Profile</a></li>
+            <li><a href="#" class="logout"><span class="icon">🚪</span> Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div id="content-area"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#content-area').load('/fragments/user_search.html');
+
+        $('.sidebar a').click(function (event) {
+            event.preventDefault();
+            $('.sidebar a').removeClass('selected');
+            $(this).addClass('selected');
+            const page = $(this).data('page');
+            $('#content-area').load('/fragments/' + page);
+        });
+
+        $('.logout').click(async function (event) {
+            event.preventDefault();
+            const response = await fetch('/api/users/logout', { method: 'POST' });
+            if (response.ok) window.location.href = '/';
+        });
+    });
+</script>
+</body>
+</html>

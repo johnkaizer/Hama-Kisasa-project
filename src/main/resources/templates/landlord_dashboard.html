@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Landlord Dashboard - Hama Kisasa</title>
+    <link rel="stylesheet" href="/static/dashboard.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="sidebar">
+        <h2>Landlord Panel</h2>
+        <ul>
+            <li><a href="#" data-page="landlord_overview.html" class="selected"><span class="icon">🏠</span> Overview</a></li>
+            <li><a href="#" data-page="landlord_properties.html"><span class="icon">🏢</span> Manage Properties</a></li>
+            <li><a href="#" data-page="landlord_bookings.html"><span class="icon">📅</span> Booking Requests</a></li>
+            <li><a href="#" data-page="landlord_feedback.html"><span class="icon">💬</span> Tenant Feedback</a></li>
+            <li><a href="#" class="logout"><span class="icon">🚪</span> Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div id="content-area"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#content-area').load('/fragments/landlord_overview.html');
+
+        $('.sidebar a').click(function (event) {
+            event.preventDefault();
+            $('.sidebar a').removeClass('selected');
+            $(this).addClass('selected');
+            const page = $(this).data('page');
+            $('#content-area').load('/fragments/' + page);
+        });
+
+        $('.logout').click(async function (event) {
+            event.preventDefault();
+            const response = await fetch('/api/users/logout', { method: 'POST' });
+            if (response.ok) window.location.href = '/';
+        });
+    });
+</script>
+</body>
+</html>
