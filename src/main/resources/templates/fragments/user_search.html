@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Search - Hama Kisasa</title>
+    <style>
+        * {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #0044cc;
+        }
+
+        .filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-section label {
+            font-weight: bold;
+        }
+
+        .filter-section input,
+        .filter-section select,
+        .filter-section button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .filter-section button {
+            background-color: #0044cc;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .filter-section button:hover {
+            opacity: 0.9;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+        }
+
+        .card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .card-details {
+            padding: 15px;
+        }
+
+        .card-details h3 {
+            font-size: 1.2em;
+            margin: 0;
+            color: #0044cc;
+        }
+
+        .card-details p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .card-details .amount {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Modal Styles */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .modal-header {
+            font-size: 1.5em;
+            color: #0044cc;
+        }
+
+        .modal-close {
+            font-size: 1.5em;
+            color: #aaa;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .modal-close:hover {
+            color: #000;
+        }
+
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>Search Houses</h1>
+
+<!-- Filter Section -->
+<div class="filter-section">
+    <div>
+        <label for="type">Type:</label>
+        <select id="type">
+            <option value="">All</option>
+            <option value="Apartment">Apartment</option>
+            <option value="Bungalow">Bungalow</option>
+            <option value="Maisonette">Maisonette</option>
+        </select>
+    </div>
+    <div>
+        <label for="amount">Max Amount:</label>
+        <input type="number" id="amount" placeholder="Enter maximum amount">
+    </div>
+    <div>
+        <label for="location">Location:</label>
+        <input type="text" id="location" placeholder="Enter location">
+    </div>
+    <button id="filter-button">Search</button>
+</div>
+
+<!-- Cards Container -->
+<div class="cards-container" id="cards-container">
+    <!-- Cards will be loaded here dynamically -->
+</div>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal()"></div>
+<div class="modal" id="propertyModal">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <div class="modal-header" id="modalTitle"></div>
+    <div id="modalContent"></div>
+
+    <!-- Booking Appointment Form -->
+    <div id="bookingForm" style="display:none;">
+        <label for="appointmentDate">Select Date and Time:</label>
+        <input type="datetime-local" id="appointmentDate" required><br><br>
+
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" required><br><br>
+
+        <label for="phoneNumber">Phone Number:</label>
+        <input type="text" id="phoneNumber" required><br><br>
+
+        <button id="bookAppointmentButton" onclick="bookAppointment()">Book Appointment</button>
+    </div>
+</div>
+
+<script>
+    async function loadProperties(filters = {}) {
+        try {
+            let url = '/api/properties/filter';
+
+            // If there are filters, append them to the URL as query parameters
+            const params = new URLSearchParams(filters);
+            if (params.toString()) {
+                url += '?' + params.toString();
+            }
+
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Failed to fetch properties');
+
+            const properties = await response.json();
+            const container = document.getElementById('cards-container');
+            container.innerHTML = ''; // Clear existing properties
+
+            properties.forEach(property => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                     <img src="data:image/jpeg;base64,${property.image}">
+                    <div class="card-details">
+                        <h3>${property.name}</h3>
+                        <p class="amount">Ksh ${property.price}</p>
+                        <p>Location: ${property.location}</p>
+                        <p>Type: ${property.propertyType}</p>
+                    </div>
+                `;
+                card.onclick = () => openModal(property);
+                container.appendChild(card);
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function openModal(property) {
+        document.getElementById('modalTitle').innerText = property.name;
+        document.getElementById('modalContent').innerHTML = `
+        <p><strong>Location:</strong> ${property.location}</p>
+        <p><strong>Price:</strong> Ksh ${property.price}</p>
+        <p><strong>Type:</strong> ${property.propertyType}</p>
+        <p><strong>Description:</strong> ${property.description}</p>
+        <p><strong>Status:</strong> ${property.status ? 'Available' : 'Unavailable'}</p>
+    `;
+
+        // Show the booking form
+        document.getElementById('bookingForm').style.display = 'block';
+        document.getElementById('modalBackdrop').style.display = 'block';
+        document.getElementById('propertyModal').style.display = 'block';
+        selectedProperty = property;  // Save selected property for booking
+    }
+
+    async function bookAppointment() {
+        const appointmentDate = document.getElementById('appointmentDate').value;
+        const name = document.getElementById('name').value;
+        const phoneNumber = document.getElementById('phoneNumber').value;
+
+        console.log('Entered Data:', { appointmentDate, name, phoneNumber });
+
+        if (!appointmentDate || !name || !phoneNumber) {
+            alert("Please fill in all fields!");
+            console.warn('Validation failed: Missing input fields.');
+            return;
+        }
+
+        try {
+            // Log the process of fetching tenant ID
+            console.log('Fetching tenant ID...');
+            const response = await fetch('/api/users/currentUserId');
+            const tenantId = await response.json();
+            console.log('Tenant ID fetched:', tenantId);
+
+            // Construct the booking object
+            const booking = {
+                tenantId: tenantId,
+                propertyId: selectedProperty.id,
+                propertyName: selectedProperty.name,
+                landlordId: selectedProperty.landlordId,
+                appointmentDate: appointmentDate,
+                name: name,
+                phoneNumber: phoneNumber,
+                status: "Pending",  // Default status
+            };
+
+            console.log('Booking data constructed:', booking);
+
+            // Send booking request to the backend
+            console.log('Sending booking request to the backend...');
+            const bookingResponse = await fetch('/api/bookings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(booking),
+            });
+
+            if (bookingResponse.ok) {
+                console.log('Booking request succeeded.');
+                alert('Booking successful! We will confirm your appointment soon.');
+                closeModal();
+            } else {
+                console.error('Booking request failed with status:', bookingResponse.status);
+                alert('Failed to book appointment.');
+            }
+        } catch (error) {
+            console.error('Error occurred during booking process:', error);
+            alert('An error occurred while booking the appointment.');
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('modalBackdrop').style.display = 'none';
+        document.getElementById('propertyModal').style.display = 'none';
+        document.getElementById('bookingForm').style.display = 'none';  // Hide the booking form
+    }
+
+    // Filter button click handler
+    $('#filter-button').click(function () {
+        const type = $('#type').val();
+        const amount = $('#amount').val();
+        const location = $('#location').val();
+
+        const filters = {
+            minPrice: amount ? parseFloat(amount) : undefined,
+            maxPrice: amount ? parseFloat(amount) : undefined,
+            location: location || undefined,
+            propertyType: type || undefined
+        };
+
+        loadProperties(filters);
+    });
+
+    // Load properties on page load
+    loadProperties(); // Load all properties initially
+</script>
+</body>
+</html>

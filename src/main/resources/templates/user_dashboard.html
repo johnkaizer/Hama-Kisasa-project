@@ -2,40 +2,95 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard - Hama Kisasa</title>
-    <link rel="stylesheet" href="/static/dashboard.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .navbar {
+            display: flex;
+            background-color: #0044cc; /* Blue background for menu */
+            padding: 10px 20px;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            color: white;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .navbar ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar li {
+            display: inline;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            padding: 5px 10px;
+        }
+
+        .navbar a.selected {
+            background-color: #002a80; /* Darker blue for selected menu */
+            border-radius: 5px;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        #content-area {
+            background-color: #f4f8fc; /* Light blue background for content */
+            padding: 20px;
+            border-radius: 10px;
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-<div class="dashboard-container">
-    <div class="sidebar">
-        <h2>User Panel</h2>
-        <ul>
-            <li><a href="#" data-page="user_search.html" class="selected"><span class="icon">🔍</span> Search Properties</a></li>
-            <li><a href="#" data-page="user_wishlist.html"><span class="icon">❤️</span> Wishlist</a></li>
-            <li><a href="#" data-page="user_bookings.html"><span class="icon">📅</span> Bookings</a></li>
-            <li><a href="#" data-page="user_profile.html"><span class="icon">👤</span> Profile</a></li>
-            <li><a href="#" class="logout"><span class="icon">🚪</span> Logout</a></li>
-        </ul>
-    </div>
+<!-- Top navigation menu -->
+<div class="navbar">
+    <h2>User Panel</h2>
+    <ul>
+        <li><a href="#" data-page="user_search.html" class="selected"><span class="icon">🔍</span> Search Properties</a></li>
+        <li><a href="#" data-page="user_bookings.html"><span class="icon">📅</span> Bookings</a></li>
+        <li><a href="#" data-page="user_profile.html"><span class="icon">👤</span> Profile</a></li>
+        <li><a href="#" class="logout"><span class="icon">🚪</span> Logout</a></li>
+    </ul>
+</div>
 
-    <div class="main-content">
-        <div id="content-area"></div>
-    </div>
+<!-- Main content area -->
+<div class="content">
+    <div id="content-area"></div>
 </div>
 
 <script>
     $(document).ready(function () {
+        // Load default content
         $('#content-area').load('/fragments/user_search.html');
 
-        $('.sidebar a').click(function (event) {
+        // Handle menu clicks
+        $('.navbar a').click(function (event) {
             event.preventDefault();
-            $('.sidebar a').removeClass('selected');
+            $('.navbar a').removeClass('selected');
             $(this).addClass('selected');
             const page = $(this).data('page');
             $('#content-area').load('/fragments/' + page);
         });
 
+        // Logout action
         $('.logout').click(async function (event) {
             event.preventDefault();
             const response = await fetch('/api/users/logout', { method: 'POST' });

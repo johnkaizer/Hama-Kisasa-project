@@ -1,7 +1,5 @@
 package com.project.hamakisasa.booking;
 
-import com.project.hamakisasa.properties.Property;
-import com.project.hamakisasa.users.User;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,18 +13,13 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "tenant_id")
-    private User tenant; // Reference to User as a tenant
-
-    @ManyToOne
-    @JoinColumn(name = "property_id")
-    private Property property; // Reference to Property
-
+    private Long tenantId;
+    private Long propertyId;
+    private Long landlordId;
+    private String propertyName;
     private LocalDateTime appointmentDate;
-
-    @Enumerated(EnumType.STRING)
-    private BookingStatus status; // Pending, Confirmed, Cancelled
+    private String name;
+    private String phoneNumber;
+    private String status; // Pending, Confirmed, Cancelled
 
 }

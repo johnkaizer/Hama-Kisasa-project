@@ -3,140 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hama Kisasa - Property Listings</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>Hama Kisasa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #007bff, #6a11cb);
+            color: white;
+        }
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        .navbar .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .navbar button {
+            padding: 8px 15px;
+            background-color: white;
+            color: #007bff;
+            border: 1px solid white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .navbar button:hover {
+            background-color: #e6f2ff;
+        }
+        .property-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            margin: 0 auto;
+            max-width: 1200px;
+        }
+        .property-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .property-card:hover {
+            transform: translateY(-5px);
+        }
+        .property-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .property-details {
+            padding: 15px;
+        }
+        .property-details h3 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .property-details p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .property-details .price {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            display: none;
+            z-index: 1000;
+        }
+        .modal-header {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .modal-close {
+            float: right;
+            cursor: pointer;
+            color: red;
+        }
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-<!-- Top bar with Login and Wishlist icons -->
-<div class="top-bar">
-    <a href="/login">Login</a>
-    <a href="/wishlist">Wishlist</a>
+<!-- Navbar -->
+<div class="navbar">
+    <h1>Hama Kisasa</h1>
+    <div class="buttons">
+        <button onclick="navigateTo('register')">Register</button>
+        <button onclick="navigateTo('login')">Log In</button>
+    </div>
 </div>
 
-<div class="container">
-    <header>
-        <h1>Find Your Perfect Home</h1>
-        <p>Explore the latest property listings on Hama Kisasa</p>
-    </header>
+<!-- Property Listings -->
+<div class="property-container" id="propertyContainer"></div>
 
-    <!-- Filters Section -->
-    <div class="filter-section">
-        <input type="text" id="search" placeholder="Search by location..." />
-        <select id="propertyType">
-            <option value="">All Types</option>
-            <option value="APARTMENT">Apartment</option>
-            <option value="BUNGALOW">Bungalow</option>
-        </select>
-        <input type="number" id="minPrice" placeholder="Min Price" />
-        <input type="number" id="maxPrice" placeholder="Max Price" />
-        <button onclick="applyFilters()">Apply Filters</button>
+<!-- Modal -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal()"></div>
+<div class="modal" id="propertyModal">
+    <div>
+        <span class="modal-close" onclick="closeModal()">&times;</span>
     </div>
-
-    <!-- Properties Section -->
-    <div id="properties" class="properties">
-        <!-- Cards will be injected here -->
-    </div>
+    <div class="modal-header" id="modalTitle"></div>
+    <div id="modalContent"></div>
 </div>
 
 <script>
-    // Mock data for properties and JavaScript functions
-    const properties = [
-        {
-            id: 1,
-            name: "Modern Apartment",
-            location: "Nairobi",
-            price: 45000,
-            bedrooms: 3,
-            propertyType: "APARTMENT",
-            photos: ["https://via.placeholder.com/280x180.png?text=Apartment+1"]
-        },
-        {
-            id: 2,
-            name: "Family Bungalow",
-            location: "Mombasa",
-            price: 75000,
-            bedrooms: 4,
-            propertyType: "BUNGALOW",
-            photos: ["https://via.placeholder.com/280x180.png?text=Bungalow+1"]
-        },
-        {
-            id: 3,
-            name: "Luxury Apartment",
-            location: "Nairobi",
-            price: 120000,
-            bedrooms: 5,
-            propertyType: "APARTMENT",
-            photos: "https://images.app.goo.gl/jdqBFMhbyjJmupA4A"
-        },
-        {
-            id: 4,
-            name: "Cozy Bungalow",
-            location: "Kisumu",
-            price: 60000,
-            bedrooms: 3,
-            propertyType: "BUNGALOW",
-            photos: ["https://images.app.goo.gl/jdqBFMhbyjJmupA4A/280x180.png?text=Bungalow+2"]
+    async function loadProperties() {
+        try {
+            const response = await fetch('/api/properties');
+            if (!response.ok) throw new Error('Failed to fetch properties');
+
+            const properties = await response.json();
+            const container = document.getElementById('propertyContainer');
+            container.innerHTML = '';
+
+            properties.forEach(property => {
+                const card = document.createElement('div');
+                card.className = 'property-card';
+                card.innerHTML = `
+                         <img src="data:image/jpeg;base64,${property.image}">
+                        <div class="property-details">
+                            <h3>${property.name}</h3>
+                            <p class="price">Ksh ${property.price}</p>
+                            <p>Location: ${property.location}</p>
+                            <p>Type: ${property.propertyType}</p>
+                        </div>
+                    `;
+                card.onclick = () => openModal(property);
+                container.appendChild(card);
+            });
+        } catch (error) {
+            console.error(error);
         }
-    ];
-
-    let wishlist = [];
-
-    // Function to display properties on the page
-    function displayProperties(properties) {
-        const propertiesContainer = document.getElementById('properties');
-        propertiesContainer.innerHTML = ''; // Clear previous results
-
-        properties.forEach(property => {
-            const card = document.createElement('div');
-            card.className = 'card';
-
-            card.innerHTML = `
-                    <img src="${property.photos[0]}" alt="${property.name}">
-                    <div class="card-content">
-                        <h3>${property.name}</h3>
-                        <p>Location: ${property.location}</p>
-                        <p>Bedrooms: ${property.bedrooms}</p>
-                        <p class="price">Ksh ${property.price}</p>
-                    </div>
-                    <button class="wishlist-btn" onclick="addToWishlist(${property.id})">&#x2764;</button>
-                `;
-
-            propertiesContainer.appendChild(card);
-        });
     }
 
-    // Function to add property to wishlist
-    function addToWishlist(propertyId) {
-        const property = properties.find(prop => prop.id === propertyId);
-        if (!wishlist.includes(property)) {
-            wishlist.push(property);
-            alert(`${property.name} added to your wishlist!`);
-        } else {
-            alert(`${property.name} is already in your wishlist.`);
-        }
-        console.log("Wishlist:", wishlist); // For debugging
+    function openModal(property) {
+        document.getElementById('modalTitle').innerText = property.name;
+        document.getElementById('modalContent').innerHTML = `
+                <p><strong>Location:</strong> ${property.location}</p>
+                <p><strong>Price:</strong> Ksh ${property.price}</p>
+                <p><strong>Type:</strong> ${property.propertyType}</p>
+                <p><strong>Description:</strong> ${property.description}</p>
+                <p><strong>Status:</strong> ${property.status ? 'Available' : 'Unavailable'}</p>
+            `;
+        document.getElementById('modalBackdrop').style.display = 'block';
+        document.getElementById('propertyModal').style.display = 'block';
     }
 
-    // Function to apply filters and display the filtered properties
-    function applyFilters() {
-        const search = document.getElementById('search').value.toLowerCase();
-        const propertyType = document.getElementById('propertyType').value;
-        const minPrice = parseInt(document.getElementById('minPrice').value) || 0;
-        const maxPrice = parseInt(document.getElementById('maxPrice').value) || Infinity;
-
-        const filteredProperties = properties.filter(property => {
-            const matchesLocation = property.location.toLowerCase().includes(search);
-            const matchesType = !propertyType || property.propertyType === propertyType;
-            const matchesPrice = property.price >= minPrice && property.price <= maxPrice;
-
-            return matchesLocation && matchesType && matchesPrice;
-        });
-
-        displayProperties(filteredProperties);
+    function closeModal() {
+        document.getElementById('modalBackdrop').style.display = 'none';
+        document.getElementById('propertyModal').style.display = 'none';
     }
 
-    // Initial display of all properties
-    displayProperties(properties);
+    function navigateTo(page) {
+        window.location.href = `/${page}`;
+    }
+
+    // Load properties on page load
+    loadProperties();
 </script>
 </body>
 </html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Management</title>
+    <style>
+        /* Include your provided CSS */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .property-management-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        #search-bar {
+            width: 300px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #properties-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #properties-table th,
+        #properties-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        #properties-table th {
+            background: #f4f4f4;
+            color: #333;
+        }
+
+        #properties-table td {
+            background: #fafafa;
+        }
+
+        .actions button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .actions button:hover {
+            background-color: #0056b3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            border-radius: 5px;
+        }
+
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #000;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #007bff;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+        }
+
+        .form-group button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .form-group button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+<div class="property-management-container">
+    <div class="actions">
+        <input type="text" id="search-bar" placeholder="Search properties..." onkeyup="filterProperties()">
+        <button onclick="openModal('add-property-modal')">Add Property</button>
+    </div>
+
+    <table id="properties-table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Price</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="properties-tbody">
+        <!-- Rows will be dynamically populated -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Property Modal -->
+<div id="add-property-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal('add-property-modal')">&times;</span>
+        <div class="modal-header">
+            <h3>Add Property</h3>
+        </div>
+        <form id="add-property-form" onsubmit="handleAddProperty(event)">
+            <div class="form-group">
+                <label for="property-name">Name</label>
+                <input type="text" id="property-name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="property-location">Location</label>
+                <select id="property-location" name="location" required>
+                    <option value="" disabled selected>Select Location</option>
+                    <option value="Dagoretti North">Dagoretti North</option>
+                    <option value="Dagoretti South">Dagoretti South</option>
+                    <option value="Embakasi Central">Embakasi Central</option>
+                    <option value="Embakasi East">Embakasi East</option>
+                    <option value="Embakasi North">Embakasi North</option>
+                    <option value="Embakasi South">Embakasi South</option>
+                    <option value="Embakasi West">Embakasi West</option>
+                    <option value="Kamukunji">Kamukunji</option>
+                    <option value="Kasarani">Kasarani</option>
+                    <option value="Kibra">Kibra</option>
+                    <option value="Langata">Langata</option>
+                    <option value="Makadara">Makadara</option>
+                    <option value="Mathare">Mathare</option>
+                    <option value="Roysambu">Roysambu</option>
+                    <option value="Ruaraka">Ruaraka</option>
+                    <option value="Starehe">Starehe</option>
+                    <option value="Westlands">Westlands</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="property-price">Price</label>
+                <input type="number" id="property-price" name="price" required>
+            </div>
+            <div class="form-group">
+                <label for="property-type">Property Type</label>
+                <select id="property-type" name="propertyType" required>
+                    <option value="Apartment">Apartment</option>
+                    <option value="Bungalow">Bungalow</option>
+                    <option value="One Bedroom">One Bedroom</option>
+                    <option value="Bedsitter">Bedsitter</option>
+                    <option value="Two Bedroom">Two Bedroom</option>
+                    <option value="Studio Apartment">Studio Apartment</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="property-description">Description</label>
+                <textarea id="property-description" name="description" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="property-image">Image</label>
+                <input type="file" id="property-image" name="image" required>
+            </div>
+            <div class="form-group">
+                <label for="property-status">Status</label>
+                <select id="property-status" name="status" required>
+                    <option value="true">Available</option>
+                    <option value="false">Unavailable</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit">Add Property</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Property Modal -->
+<div id="edit-property-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal('edit-property-modal')">&times;</span>
+        <div class="modal-header">
+            <h3>Edit Property</h3>
+        </div>
+        <form id="edit-property-form" onsubmit="handleEditProperty(event)">
+            <input type="hidden" id="edit-property-id">
+            <div class="form-group">
+                <label for="edit-property-name">Name</label>
+                <input type="text" id="edit-property-name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-property-location">Location</label>
+                <select id="edit-property-location" name="location" required>
+                    <option value="" disabled>Select Location</option>
+                    <option value="Dagoretti North">Dagoretti North</option>
+                    <option value="Dagoretti South">Dagoretti South</option>
+                    <option value="Embakasi Central">Embakasi Central</option>
+                    <option value="Embakasi East">Embakasi East</option>
+                    <option value="Embakasi North">Embakasi North</option>
+                    <option value="Embakasi South">Embakasi South</option>
+                    <option value="Embakasi West">Embakasi West</option>
+                    <option value="Kamukunji">Kamukunji</option>
+                    <option value="Kasarani">Kasarani</option>
+                    <option value="Kibra">Kibra</option>
+                    <option value="Langata">Langata</option>
+                    <option value="Makadara">Makadara</option>
+                    <option value="Mathare">Mathare</option>
+                    <option value="Roysambu">Roysambu</option>
+                    <option value="Ruaraka">Ruaraka</option>
+                    <option value="Starehe">Starehe</option>
+                    <option value="Westlands">Westlands</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="edit-property-price">Price</label>
+                <input type="number" id="edit-property-price" name="price" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-property-type">Property Type</label>
+                <select id="edit-property-type" name="propertyType" required>
+                    <option value="Apartment">Apartment</option>
+                    <option value="Bungalow">Bungalow</option>
+                    <option value="One Bedroom">One Bedroom</option>
+                    <option value="Bedsitter">Bedsitter</option>
+                    <option value="Two Bedroom">Two Bedroom</option>
+                    <option value="Studio Apartment">Studio Apartment</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="edit-property-description">Description</label>
+                <textarea id="edit-property-description" name="description" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit-property-status">Status</label>
+                <select id="edit-property-status" name="status" required>
+                    <option value="true">Available</option>
+                    <option value="false">Unavailable</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Open and close modal functions using jQuery
+    function openModal(modalId) {
+        $("#" + modalId).show();
+    }
+
+    function closeModal(modalId) {
+        $("#" + modalId).hide();
+    }
+
+    // Load properties for the admin without using a global variable
+    function loadProperties() {
+        // Fetch the current landlord ID using jQuery's AJAX
+        $.get("/api/users/currentUserId", function(landlordId) {
+            // Fetch properties for the current landlord
+            $.get(`/api/properties/landlord/${landlordId}`, function(properties) {
+                // Populate the table with properties
+                const tbody = $("#properties-tbody");
+                tbody.empty(); // Clear table body
+
+                properties.forEach(function(property) {
+                    const row = `
+                        <tr>
+                            <td>${property.name}</td>
+                            <td>${property.location}</td>
+                            <td>${property.price}</td>
+                            <td>${property.propertyType}</td>
+                            <td>${property.status ? "Available" : "Unavailable"}</td>
+                            <td>
+                                <button onclick="prepareEditProperty(${property.id}, ${JSON.stringify(property)})">Edit</button>
+                                <button onclick="deleteProperty(${property.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            }).fail(function() {
+                alert("An error occurred while loading properties.");
+            });
+        }).fail(function() {
+            alert("An error occurred while fetching landlord ID.");
+        });
+    }
+
+    // Add property
+    function handleAddProperty(event) {
+        event.preventDefault();
+
+        // Fetch the current landlord ID using jQuery's AJAX
+        $.get("/api/users/currentUserId", function(landlordId) {
+            const formData = new FormData();
+            formData.append("name", $("#property-name").val());
+            formData.append("location", $("#property-location").val());
+            formData.append("price", $("#property-price").val());
+            formData.append("propertyType", $("#property-type").val());
+            formData.append("description", $("#property-description").val());
+            formData.append("image", $("#property-image")[0].files[0]);
+            formData.append("status", $("#property-status").val() === "true");
+            formData.append("landlordId", landlordId);
+
+            // Send the request to add the property using jQuery's AJAX
+            $.ajax({
+                url: "/api/properties",
+                method: "POST",
+                processData: false,
+                contentType: false,
+                data: formData,
+                success: function() {
+                    loadProperties();
+                    closeModal("add-property-modal");
+                },
+                error: function() {
+                    alert("An error occurred while adding the property.");
+                }
+            });
+        }).fail(function() {
+            alert("An error occurred while fetching landlord ID.");
+        });
+    }
+
+    // Prepare data for editing (no need for global properties, fetch the property directly)
+    function prepareEditProperty(id, property) {
+        if (!property) return;
+
+        $("#edit-property-id").val(id);
+        $("#edit-property-name").val(property.name);
+        $("#edit-property-location").val(property.location);
+        $("#edit-property-price").val(property.price);
+        $("#edit-property-type").val(property.propertyType);
+        $("#edit-property-description").val(property.description);
+        $("#edit-property-status").val(property.status ? "true" : "false");
+        openModal("edit-property-modal");
+    }
+
+    // Edit property
+    function handleEditProperty(event) {
+        event.preventDefault();
+        const id = $("#edit-property-id").val();
+        const updatedProperty = {
+            name: $("#edit-property-name").val(),
+            location: $("#edit-property-location").val(),
+            price: $("#edit-property-price").val(),
+            propertyType: $("#edit-property-type").val(),
+            description: $("#edit-property-description").val(),
+            status: $("#edit-property-status").val() === "true",
+        };
+
+        // Send the request to edit the property using jQuery's AJAX
+        $.ajax({
+            url: `/api/properties/${id}`,
+            method: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify(updatedProperty),
+            success: function() {
+                loadProperties();
+                closeModal("edit-property-modal");
+            },
+            error: function() {
+                alert("An error occurred while editing the property.");
+            }
+        });
+    }
+
+    // Delete property
+    function deleteProperty(id) {
+        if (confirm("Are you sure you want to delete this property?")) {
+            // Send the request to delete the property using jQuery's AJAX
+            $.ajax({
+                url: `/api/properties/${id}`,
+                method: "DELETE",
+                success: function() {
+                    loadProperties();
+                },
+                error: function() {
+                    alert("An error occurred while deleting the property.");
+                }
+            });
+        }
+    }
+
+    // Initial loading
+    $(document).ready(function() {
+        loadProperties();
+    });
+</script>
+
+</body>
+</html>

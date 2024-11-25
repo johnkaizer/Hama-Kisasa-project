@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Overview</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* Overview Container */
+        .overview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+            justify-content: center;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 250px;
+            text-align: center;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .card h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>Admin Dashboard - Overview</h1>
+<div class="overview-container">
+    <div class="card">
+        <h3>Total Users</h3>
+        <p id="total-users">Loading...</p>
+    </div>
+    <div class="card">
+        <h3>Total Houses</h3>
+        <p id="total-houses">Loading...</p>
+    </div>
+    <div class="card">
+        <h3>Total Bookings</h3>
+        <p id="total-bookings">Loading...</p>
+    </div>
+</div>
+
+<footer>
+    &copy; 2024 Hama Kisasa. All rights reserved.
+</footer>
+
+<script>
+    $(document).ready(function () {
+        // Fetch total users
+        $.get('/api/users/total', function (data) {
+            $('#total-users').text(data || '0');
+        }).fail(function () {
+            $('#total-users').text('Error');
+        });
+
+        // Fetch total properties
+        $.get('/api/properties/total', function (data) {
+            $('#total-houses').text(data || '0');
+        }).fail(function () {
+            $('#total-houses').text('Error');
+        });
+
+        // Fetch total bookings
+        $.get('/api/bookings/total', function (data) {
+            $('#total-bookings').text(data || '0');
+        }).fail(function () {
+            $('#total-bookings').text('Error');
+        });
+    });
+</script>
+</body>
+</html>

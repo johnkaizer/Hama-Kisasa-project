@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register User</title>
+    <!-- Link to Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #007bff, #6a11cb);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            text-align: center;
+        }
+        .container h2 {
+            margin: 15px 0;
+            color: #007bff;
+        }
+        .icon {
+            font-size: 50px;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .submit-btn, .nav-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .submit-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+        .nav-btn {
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .nav-btn:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="registerScreen">
+    <!-- House Icon -->
+    <i class="fas fa-house-user icon"></i>
+    <h2>Register User</h2>
+    <form id="registerForm">
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" minlength="4" required>
+            <div class="error" id="passwordError"></div>
+        </div>
+        <div class="form-group">
+            <label for="phoneNumber">Phone Number</label>
+            <input type="number" id="phoneNumber" name="phoneNumber" pattern="\d{10}" maxlength="10" required>
+            <div class="error" id="phoneError"></div>
+        </div>
+        <div class="form-group">
+            <label for="role">Role</label>
+            <select id="role" name="role" required>
+                <option value="">Select Role</option>
+                <option value="TENANT">Tenant</option>
+                <option value="LANDLORD">Landlord</option>
+            </select>
+        </div>
+        <button type="submit" class="submit-btn">Register</button>
+    </form>
+    <button class="nav-btn" onclick="navigateToLogin()">Go to Login</button>
+    <button class="nav-btn" onclick="navigateToLanding()">Go to Landing</button>
+</div>
+
+<script>
+    const registerForm = document.getElementById('registerForm');
+
+    registerForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        // Collect form data
+        const name = document.getElementById('name').value;
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const phoneNumber = document.getElementById('phoneNumber').value;
+        const role = document.getElementById('role').value;
+
+        // Validate phone number
+        const phoneError = document.getElementById('phoneError');
+        if (!/^\d{10}$/.test(phoneNumber)) {
+            phoneError.textContent = 'Phone number must be exactly 10 digits.';
+            return;
+        } else {
+            phoneError.textContent = '';
+        }
+
+        // Validate password
+        const passwordError = document.getElementById('passwordError');
+        if (password.length < 4) {
+            passwordError.textContent = 'Password must be at least 4 characters long.';
+            return;
+        } else {
+            passwordError.textContent = '';
+        }
+
+        // Prepare payload
+        const user = { name, username, password, phoneNumber, role };
+
+        try {
+            // Send POST request
+            const response = await fetch('http://localhost:8080/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(user),
+            });
+
+            if (response.ok) {
+                alert('User registered successfully!');
+                registerForm.reset();
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to register: ${errorData.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        }
+    });
+
+    // Navigation functions
+    function navigateToLogin() {
+        window.location.href = 'login'; // Replace with your login page URL
+    }
+
+    function navigateToLanding() {
+        window.location.href = '/'; // Replace with your landing page URL
+    }
+</script>
+</body>
+</html>

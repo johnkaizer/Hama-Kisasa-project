@@ -14,14 +14,12 @@ public class User {
 
     private String name;
 
-    @Column(unique = true)
-    private String email;
+    private String username;
 
     private String password;
 
     private String phoneNumber;
 
-    @Enumerated(EnumType.STRING)
-    private Role role; // Tenant, Landlord, Agent
+    private String role; // ADMIN,EMP, USERS
 
 }

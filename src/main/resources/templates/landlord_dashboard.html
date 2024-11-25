@@ -2,44 +2,126 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Landlord Dashboard - Hama Kisasa</title>
-    <link rel="stylesheet" href="/static/dashboard.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* General Reset */
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header (Menu Bar) */
+        .menu-bar {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-bar h1 {
+            font-size: 1.5em;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .menu-bar nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .menu-bar a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1em;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu-bar a:hover,
+        .menu-bar a.selected {
+            background-color: #0056b3;
+        }
+
+        /* Main Content Area */
+        .content-container {
+            flex: 1;
+            padding: 20px;
+        }
+
+        #content-area {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .menu-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .menu-bar h1 {
+                margin-bottom: 10px;
+            }
+
+            .menu-bar nav {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="dashboard-container">
-    <div class="sidebar">
-        <h2>Landlord Panel</h2>
-        <ul>
-            <li><a href="#" data-page="landlord_overview.html" class="selected"><span class="icon">🏠</span> Overview</a></li>
-            <li><a href="#" data-page="landlord_properties.html"><span class="icon">🏢</span> Manage Properties</a></li>
-            <li><a href="#" data-page="landlord_bookings.html"><span class="icon">📅</span> Booking Requests</a></li>
-            <li><a href="#" data-page="landlord_feedback.html"><span class="icon">💬</span> Tenant Feedback</a></li>
-            <li><a href="#" class="logout"><span class="icon">🚪</span> Logout</a></li>
-        </ul>
-    </div>
+<!-- Menu Bar -->
+<header class="menu-bar">
+    <h1>Hama Kisasa</h1>
+    <nav>
+        <a href="#" data-page="landlord_properties.html" class="selected"><i class="fas fa-building"></i> Manage Properties</a>
+        <a href="#" data-page="landlord_bookings.html"><i class="fas fa-calendar-check"></i> Booking Requests</a>
+        <a href="#" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+</header>
 
-    <div class="main-content">
-        <div id="content-area"></div>
-    </div>
+<!-- Main Content Area -->
+<div class="content-container">
+    <div id="content-area"></div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
-        $('#content-area').load('/fragments/landlord_overview.html');
+        // Load default content
+        $('#content-area').load('/fragments/landlord_properties.html');
 
-        $('.sidebar a').click(function (event) {
+        // Menu bar navigation
+        $('.menu-bar a').click(function (event) {
             event.preventDefault();
-            $('.sidebar a').removeClass('selected');
+            $('.menu-bar a').removeClass('selected');
             $(this).addClass('selected');
             const page = $(this).data('page');
             $('#content-area').load('/fragments/' + page);
         });
 
+        // Logout functionality
         $('.logout').click(async function (event) {
             event.preventDefault();
             const response = await fetch('/api/users/logout', { method: 'POST' });
-            if (response.ok) window.location.href = '/';
+            if (response.ok) {
+                alert('Successfully logged out.');
+                window.location.href = '/';
+            }
         });
     });
 </script>

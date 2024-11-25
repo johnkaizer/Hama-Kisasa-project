@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Reports</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .report-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px;
+        }
+
+        /* Card Styles */
+        .report-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 250px;
+            text-align: center;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .report-card h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .report-card p {
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        .report-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Table Styles */
+        .detailed-report {
+            margin: 20px auto;
+            max-width: 90%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f8f8;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>Admin - Reports</h1>
+<div class="report-container">
+    <div class="report-card" id="total-users">
+        <h2>Total Users</h2>
+        <p>Loading...</p>
+    </div>
+    <div class="report-card" id="total-properties">
+        <h2>Total Properties</h2>
+        <p>Loading...</p>
+    </div>
+    <div class="report-card" id="total-bookings">
+        <h2>Total Bookings</h2>
+        <p>Loading...</p>
+    </div>
+</div>
+
+<div class="detailed-report">
+    <h2>Detailed Bookings Report</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Property</th>
+            <th>Tenant Name</th>
+            <th>Appointment Date</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody id="detailed-report-body">
+        <!-- Rows will be dynamically populated here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Fetch report data
+        function fetchReports() {
+            // Fetch total users
+            $.get('/api/users/total', function (data) {
+                $('#total-users').text(data || '0');
+            }).fail(function () {
+                $('#total-users').text('Error');
+            });
+
+            // Fetch total properties
+            $.get('/api/properties/total', function (data) {
+                $('#total-properties').text(data || '0');
+            }).fail(function () {
+                $('#total-properties').text('Error');
+            });
+
+            // Fetch total bookings
+            $.get('/api/bookings/total', function (data) {
+                $('#total-bookings').text(data || '0');
+            }).fail(function () {
+                $('#total-bookings').text('Error');
+            });
+
+            // Fetch detailed bookings
+            $.get('/api/bookings/admin', function (bookings) {
+                const detailedReportBody = $('#detailed-report-body');
+                detailedReportBody.empty(); // Clear existing rows
+                bookings.forEach(booking => {
+                    const bookingRow = `
+                            <tr>
+                                <td>${booking.id}</td>
+                                <td>${booking.propertyName}</td>
+                                <td>${booking.name}</td>
+                                <td>${booking.appointmentDate}</td>
+                                <td>${booking.status}</td>
+                            </tr>
+                        `;
+                    detailedReportBody.append(bookingRow);
+                });
+            }).fail(function () {
+                alert('Failed to fetch detailed bookings data.');
+            });
+        }
+
+        // Initial fetch
+        fetchReports();
+    });
+</script>
+</body>
+</html>

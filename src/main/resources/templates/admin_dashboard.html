@@ -2,47 +2,102 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Hama Kisasa</title>
-    <link rel="stylesheet" href="/static/dashboard.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .top-menu {
+            background-color: #0044cc;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-menu ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .top-menu ul li {
+            margin-right: 20px;
+        }
+
+        .top-menu ul li a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+
+        .top-menu ul li a.selected {
+            text-decoration: underline;
+        }
+
+        .main-content {
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+
+        .logout-button {
+            cursor: pointer;
+            color: white;
+            background: none;
+            border: none;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-<div class="dashboard-container">
-    <div class="sidebar">
-        <h2>Admin Panel</h2>
-        <ul>
-            <li><a href="#" data-page="admin_overview.html" class="selected"><span class="icon">🏠</span> Overview</a></li>
-            <li><a href="#" data-page="admin_users.html"><span class="icon">👥</span> Manage Users</a></li>
-            <li><a href="#" data-page="admin_properties.html"><span class="icon">🏢</span> Manage Properties</a></li>
-            <li><a href="#" data-page="admin_reports.html"><span class="icon">📊</span> View Reports</a></li>
-            <li><a href="#" data-page="admin_settings.html"><span class="icon">⚙️</span> Settings</a></li>
-            <li><a href="#" class="logout"><span class="icon">🚪</span> Logout</a></li>
-        </ul>
-    </div>
 
-    <div class="main-content">
-        <div id="content-area"></div>
-    </div>
+<div class="top-menu">
+    <ul>
+        <li><a href="#" data-page="admin_overview.html" class="selected">🏠 Overview</a></li>
+        <li><a href="#" data-page="admin_users.html">👥 Manage Users</a></li>
+        <li><a href="#" data-page="admin_properties.html">🏢 Manage Properties</a></li>
+        <li><a href="#" data-page="admin_reports.html">📊 View Reports</a></li>
+    </ul>
+    <button class="logout-button">🚪 Logout</button>
+</div>
+
+<div class="main-content">
+    <div id="content-area"></div>
 </div>
 
 <script>
     $(document).ready(function () {
+        // Load the initial overview page
         $('#content-area').load('/fragments/admin_overview.html');
 
-        $('.sidebar a').click(function (event) {
+        // Handle menu item clicks
+        $('.top-menu a').click(function (event) {
             event.preventDefault();
-            $('.sidebar a').removeClass('selected');
+            $('.top-menu a').removeClass('selected');
             $(this).addClass('selected');
             const page = $(this).data('page');
             $('#content-area').load('/fragments/' + page);
         });
 
-        $('.logout').click(async function (event) {
-            event.preventDefault();
+        // Handle logout
+        $('.logout-button').click(async function () {
             const response = await fetch('/api/users/logout', { method: 'POST' });
             if (response.ok) window.location.href = '/';
         });
     });
 </script>
+
 </body>
 </html>

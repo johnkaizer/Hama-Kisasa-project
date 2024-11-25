@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landlord Bookings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f8fc; /* Light blue background */
+        }
+
+        h1 {
+            text-align: center;
+            color: #0044cc; /* Blue header text */
+        }
+
+        table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+            background-color: white; /* White background for the table */
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #333; /* Blue border for table */
+        }
+
+        th {
+            background-color: #d9e6f9; /* Light blue for header cells */
+            color: #0044cc; /* Blue text for header cells */
+        }
+
+        td {
+            color: #333; /* Dark text for table cells */
+        }
+
+        button {
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
+
+        button.confirm-btn {
+            background-color: #007bff; /* Blue for confirm buttons */
+        }
+
+        button.cancel-btn {
+            background-color: #dc3545; /* Red for cancel buttons */
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Landlord Bookings</h1>
+<table id="booking-table">
+    <thead>
+    <tr>
+        <th>Appointment Date</th>
+        <th>Property Name</th>
+        <th>Tenant Name</th>
+        <th>Phone</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Bookings will be populated here dynamically -->
+    </tbody>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        function getLoggedInUserId() {
+            $.get("/api/users/currentUserId", function(userId) {
+                loadBookings(userId);
+            }).fail(function() {
+                alert("Error fetching logged-in user ID.");
+            });
+        }
+
+        function loadBookings(landlordId) {
+            $.get(`/api/bookings/landlord/bookings?landlordId=${landlordId}`, function(bookings) {
+                $('#booking-table tbody').empty();
+                bookings.forEach(booking => {
+                    const row = `
+                    <tr>
+                        <td>${booking.appointmentDate}</td>
+                        <td>${booking.propertyName}</td>
+                        <td>${booking.name}</td>
+                        <td>${booking.phoneNumber}</td>
+                        <td>${booking.status}</td>
+                        <td>
+                            <button class="confirm-btn" data-id="${booking.id}" data-status="Confirmed">Confirm</button>
+                            <button class="cancel-btn" data-id="${booking.id}" data-status="Cancelled">Cancel</button>
+                        </td>
+                    </tr>
+                `;
+                    $('#booking-table tbody').append(row);
+                });
+            }).fail(function() {
+                alert("Error fetching bookings.");
+            });
+        }
+
+        $(document).on('click', '.confirm-btn, .cancel-btn', function() {
+            const bookingId = $(this).data('id');
+            const status = $(this).data('status');
+
+            $.ajax({
+                url: `/api/bookings/update-status/${bookingId}`,
+                type: 'PUT',
+                data: JSON.stringify({ status: status }),
+                contentType: 'application/json',
+                success: function() {
+                    alert(`Booking has been ${status.toLowerCase()} successfully.`);
+                    getLoggedInUserId(); // Reload bookings
+                },
+                error: function() {
+                    alert(`Error updating booking status to ${status}.`);
+                }
+            });
+        });
+
+        getLoggedInUserId(); // Initial call to load bookings
+    });
+
+</script>
+</body>
+</html>

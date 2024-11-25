@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Hama Kisasa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #0044cc;
+        }
+
+        .profile-form {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-form label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .profile-form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .profile-form button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #0044cc;
+            color: white;
+            cursor: pointer;
+        }
+
+        .profile-form button:hover {
+            opacity: 0.9;
+        }
+
+        .profile-form .error {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>Your Profile</h1>
+
+<div class="profile-form">
+    <form id="profile-form">
+        <div>
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+
+        <div>
+            <label for="phone">Phone Number</label>
+            <input type="text" id="phone" name="phone" required>
+        </div>
+
+        <div>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+
+        <button type="submit">Save Changes</button>
+        <div class="error" id="error-message"></div>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Fetch current logged-in user profile data
+        function fetchUserProfile() {
+            $.ajax({
+                url: '/api/users/current', // Use the endpoint to get the current logged-in user
+                method: 'GET',
+                success: function(user) {
+                    // Populate the form with user data
+                    $('#name').val(user.name);
+                    $('#username').val(user.username);
+                    $('#phone').val(user.phoneNumber);
+                    $('#password').val(''); // Don't show the password in the form
+                },
+                error: function() {
+                    alert('Error fetching user data.');
+                }
+            });
+        }
+
+        // Save user profile changes
+        $('#profile-form').submit(function(event) {
+            event.preventDefault();
+
+            const updatedUser = {
+                name: $('#name').val(),
+                username: $('#username').val(),
+                phoneNumber: $('#phone').val(),
+                password: $('#password').val()
+            };
+
+            $.ajax({
+                url: '/api/users/current', // Update the current user profile
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(updatedUser),
+                success: function() {
+                    alert('Profile updated successfully.');
+                },
+                error: function(jqXHR) {
+                    const errorMsg = jqXHR.responseJSON ? jqXHR.responseJSON.message : 'Error updating profile.';
+                    $('#error-message').text(errorMsg);
+                }
+            });
+        });
+
+        // Load user profile data on page load
+        fetchUserProfile();
+    });
+</script>
+</body>
+</html>

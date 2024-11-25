@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Bookings - Hama Kisasa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #0044cc;
+        }
+
+        .bookings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .bookings-table th, .bookings-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .bookings-table th {
+            background-color: #0044cc;
+            color: white;
+        }
+
+        .action-menu {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-menu button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background-color: #ffc107;
+            color: white;
+        }
+
+        .cancel-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .action-menu button:hover {
+            opacity: 0.9;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>Your Bookings</h1>
+
+<!-- Bookings Table -->
+<table class="bookings-table">
+    <thead>
+    <tr>
+        <th>Property Name</th>
+        <th>Appointment Date</th>
+        <th>Name</th>
+        <th>Phone Number</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody id="bookings-tbody">
+    <!-- Bookings will be dynamically added here -->
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function () {
+        // Fetch bookings
+        function fetchTenantBookings() {
+            $.ajax({
+                url: '/api/users/currentUserId', // Fetch tenant ID
+                method: 'GET',
+                success: function (tenantId) {
+                    if (tenantId) {
+                        $.ajax({
+                            url: `/api/bookings/user/${tenantId}`, // Fetch tenant-specific bookings
+                            method: 'GET',
+                            success: function (bookings) {
+                                $('#bookings-tbody').empty();
+                                if (bookings.length === 0) {
+                                    $('#bookings-tbody').html('<tr><td colspan="6">No bookings found.</td></tr>');
+                                    return;
+                                }
+
+                                bookings.forEach(booking => {
+                                    const row = `
+                                <tr>
+                                    <td>${booking.propertyName}</td>
+                                    <td>${new Date(booking.appointmentDate).toLocaleString()}</td>
+                                    <td>${booking.name}</td>
+                                    <td>${booking.phoneNumber}</td>
+                                    <td>${booking.status}</td>
+                                    <td>
+                                        <div class="action-menu">
+                                            <button class="cancel-btn" data-id="${booking.id}">Cancel</button>
+                                            <button class="delete-btn" data-id="${booking.id}">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                                    $('#bookings-tbody').append(row);
+                                });
+                            },
+                            error: function () {
+                                alert('Error fetching tenant-specific bookings.');
+                            }
+                        });
+                    } else {
+                        alert('Tenant ID not found.');
+                    }
+                },
+                error: function () {
+                    alert('Error fetching tenant ID.');
+                }
+            });
+        }
+
+
+        // Fetch bookings on load
+        fetchTenantBookings();
+
+        // Cancel booking
+        // Cancel booking
+        $(document).on('click', '.cancel-btn', function () {
+            const id = $(this).data('id');
+            $.ajax({
+                url: `/api/bookings/${id}/cancel`,
+                method: 'POST',
+                success: function () {
+                    alert('Booking cancelled successfully.');
+                    fetchTenantBookings();
+                },
+                error: function () {
+                    alert('Error cancelling booking.');
+                }
+            });
+        });
+
+        // Delete booking
+        $(document).on('click', '.delete-btn', function () {
+            const id = $(this).data('id');
+            if (confirm('Are you sure you want to delete this booking?')) {
+                $.ajax({
+                    url: `/api/bookings/${id}`,
+                    method: 'DELETE',
+                    success: function () {
+                        alert('Booking deleted successfully.');
+                        fetchTenantBookings();
+                    },
+                    error: function () {
+                        alert('Error deleting booking.');
+                    }
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>
